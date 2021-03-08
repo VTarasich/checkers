@@ -1,4 +1,6 @@
-import { GameCell, GameState, Piece } from './types';
+import {
+  Cell, CellsState, Piece, PiecesState,
+} from './types';
 
 type RowTuple = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
 type BoardTuple = [RowTuple, RowTuple, RowTuple, RowTuple, RowTuple, RowTuple, RowTuple, RowTuple];
@@ -29,7 +31,22 @@ const getDefaultPieceByRowIndex = (rowIndex: number): Piece | null => {
   return null;
 };
 
-const createDefaultRow = (
+const createDefaultPiecesRow = (
+  rowIndex: number,
+  row: boolean[],
+) => row.reduce((rowResult, cell, colIndex) => {
+  // skip white cells
+  if (!cell) {
+    return rowResult;
+  }
+
+  return {
+    ...rowResult,
+    [getCellIndex(rowIndex, colIndex)]: getDefaultPieceByRowIndex(rowIndex),
+  };
+}, {} as PiecesState);
+
+const createDefaultCellsRow = (
   rowIndex: number,
   row: boolean[],
 ) => row.reduce((rowResult, cell, colIndex) => {
@@ -41,18 +58,27 @@ const createDefaultRow = (
   return {
     ...rowResult,
     [getCellIndex(rowIndex, colIndex)]: {
-      piece: getDefaultPieceByRowIndex(rowIndex),
       highlight: 'none',
-    } as GameCell,
+    } as Cell,
   };
-}, {} as GameState);
+}, {} as CellsState);
 
-export const createDefaultGameState = (): GameState => {
+export const createDefaultCellsState = (): CellsState => {
   const defaultSchema = createBoardSchema();
 
   return defaultSchema
     .reduce((gameState, row, rowIndex) => ({
       ...gameState,
-      ...createDefaultRow(rowIndex, row),
-    }), {} as GameState);
+      ...createDefaultCellsRow(rowIndex, row),
+    }), {} as CellsState);
+};
+
+export const createDefaultPiecesState = (): PiecesState => {
+  const defaultSchema = createBoardSchema();
+
+  return defaultSchema
+    .reduce((gameState, row, rowIndex) => ({
+      ...gameState,
+      ...createDefaultPiecesRow(rowIndex, row),
+    }), {} as PiecesState);
 };

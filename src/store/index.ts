@@ -1,9 +1,13 @@
 import { createStore, combineReducers } from 'redux';
 
-import { game } from './game';
+import { GameState, reducer } from './game/reducer';
 
-const store = createStore(combineReducers({
-  game,
+export interface RootState {
+  game: GameState,
+}
+
+const store = createStore(combineReducers<RootState>({
+  game: reducer,
 }));
 
 export default store;

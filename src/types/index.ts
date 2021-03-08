@@ -5,11 +5,14 @@ export interface Piece {
   isRisen: boolean;
 }
 
-export interface GameCell {
-  piece: Piece | null;
-  highlight: HighlightType;
+export interface Cell {
+  highlight: 'default' | 'none';
 }
 
-export type GameState = {
-  [key: string]: GameCell
+export interface PiecesState {
+  [key: string]: Piece | null;
+}
+
+export interface CellsState {
+  [key: string]: Cell;
 }
