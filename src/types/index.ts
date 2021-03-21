@@ -3,6 +3,7 @@ export type Color = 'white' | 'black';
 export interface Piece {
   color: Color;
   isRisen: boolean;
+  isQueen: boolean;
 }
 
 export interface CellState {

@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 import {
-  CELL_SIZE, COLOR_BLACK, COLOR_WHITE, getDottedPattern,
+  CELL_SIZE, COLOR_ACCENT, COLOR_BLACK, COLOR_WHITE, getDottedPattern,
 } from '../../common.styled';
 import { Color } from '../../types';
 
@@ -50,14 +50,19 @@ export const $PieceContainer = styled.div<PieceContainerProps>`
   `}
 `;
 
-export const $Piece = styled.div<{ pieceColor: Color; isRisen: boolean }>`
+export const $Piece = styled.div<{
+  pieceColor: Color;
+  isRisen: boolean;
+  isMandatory?: boolean;
+  isQueen?: boolean;
+}>`
   position: relative;
   width: 100%;
   height: 100%;
   border-radius: 50%;
   background-color: ${(props) => (props.pieceColor === 'white' ? COLOR_WHITE : COLOR_BLACK)};
   box-sizing: border-box;
-  border: 4px solid ${COLOR_BLACK};
+  border: 4px solid ${(props) => (props.isMandatory ? COLOR_ACCENT : COLOR_BLACK)};
   
   &:before,
   &:after {
@@ -76,11 +81,19 @@ export const $Piece = styled.div<{ pieceColor: Color; isRisen: boolean }>`
   &:before {
     width: 70%;
     height: 70%;
+    ${(props) => props.isQueen && css`
+      border: 2px solid ${COLOR_ACCENT};
+    `}
   }
   
   &:after {
     width: 40%;
     height: 40%;
+    ${(props) => props.isQueen && css`
+      border: 2px solid ${COLOR_ACCENT};
+      color: ${COLOR_ACCENT};
+      content: '!';
+    `}
   }
 `;
 

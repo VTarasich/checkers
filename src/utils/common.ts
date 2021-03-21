@@ -4,14 +4,11 @@ import {
   CellState, Piece,
 } from '../types';
 
-type RowTuple = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
-type BoardTuple = [RowTuple, RowTuple, RowTuple, RowTuple, RowTuple, RowTuple, RowTuple, RowTuple];
+export const createRowSchema = (hasOffset = false): boolean[] => Array.from(Array(8))
+  .map((_, i) => (hasOffset ? i % 2 === 1 : i % 2 === 0));
 
-export const createRowSchema = (hasOffset = false): RowTuple => Array.from(Array(8))
-  .map((_, i) => (hasOffset ? i % 2 === 1 : i % 2 === 0)) as RowTuple;
-
-export const createBoardSchema = (): BoardTuple => Array.from(Array(8))
-  .map((_, i) => createRowSchema(i % 2 === 0)) as BoardTuple;
+export const createBoardSchema = (): boolean[][] => Array.from(Array(8))
+  .map((_, i) => createRowSchema(i % 2 === 0));
 
 export const getCellIndex = ({ rowIndex, colIndex }: Coordinate): string => `${rowIndex}-${colIndex}`;
 export const getCellCoordinateFromIndex = (index: string): Coordinate => {
@@ -28,6 +25,7 @@ const getDefaultPieceByRowIndex = (rowIndex: number): Piece | null => {
     return {
       color: 'black',
       isRisen: false,
+      isQueen: false,
     };
   }
 
@@ -35,6 +33,7 @@ const getDefaultPieceByRowIndex = (rowIndex: number): Piece | null => {
     return {
       color: 'white',
       isRisen: false,
+      isQueen: false,
     };
   }
 

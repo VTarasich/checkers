@@ -8,6 +8,8 @@ import {
   getSelectIsPieceRisen,
   getSelectPieceState,
   selectCurrentPlayer,
+  selectGameMode,
+  selectMandatoryTurnPiece,
   selectSelectedPieceCoordinates,
 } from '../../store/game/selectors';
 import { hoverPiece, risePiece } from '../../store/game/actions';
@@ -25,14 +27,19 @@ const Piece: React.FC<CellProps> = ({ coordinate }) => {
 
   const dispatch = useDispatch();
   const piece = useSelector(getSelectPieceState(cellIndex));
+  const gameMode = useSelector(selectGameMode);
   const isRisen = useSelector(getSelectIsPieceRisen(cellIndex));
   const isAvailable = useSelector(getSelectIsPieceAvailable(coordinate));
   const selectedPieceCoordinates = useSelector(selectSelectedPieceCoordinates);
+  const mandatoryTurnPiece = useSelector(selectMandatoryTurnPiece);
   const currentPlayer = useSelector(selectCurrentPlayer);
 
   const isPieceHit = useIsPieceHit(coordinate);
+  const isMandatory = mandatoryTurnPiece !== null && getCellIndex(mandatoryTurnPiece) === cellIndex;
 
-  const isPieceInteractive = currentPlayer !== AI_PLAYER && isAvailable;
+  const isPieceInteractive = gameMode === 'AI'
+    ? currentPlayer !== AI_PLAYER && isAvailable
+    : isAvailable;
 
   const onKeyDown = () => {
     if (!piece || currentPlayer !== piece.color) {
@@ -73,6 +80,8 @@ const Piece: React.FC<CellProps> = ({ coordinate }) => {
         <$Piece
           onMouseDown={onKeyDown}
           pieceColor={piece.color}
+          isMandatory={isMandatory}
+          isQueen={piece.isQueen}
           isRisen={false}
         />
       </$PieceContainer>

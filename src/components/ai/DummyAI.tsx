@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCells, selectCurrentPlayer, selectMandatoryTurnPiece } from '../../store/game/selectors';
-import { getAvailableRoutes, getAvailableTurnPieces } from '../../utils/game';
+import { getAvailableRoutes, getAvailableTurnPieces, isRouteWithHitPiece } from '../../utils/game';
 import { getRandomInt } from '../../utils/common';
 import { hitPiece, movePiece } from '../../store/game/actions';
 
@@ -41,34 +41,34 @@ const DummyAI: React.FC = () => {
       const availableTurnPieces = getAvailableTurnPieces(cells, AI_PLAYER);
 
       if (!availableTurnPieces.length) {
-        console.log('>>>', 'OOOPS, I GIVE UP');
+        console.log('OOOPS, I GIVE UP');
 
         return;
       }
 
-      console.log('>>>', 'I CAN MOVE: ', availableTurnPieces);
+      console.log('I CAN MOVE: ', availableTurnPieces);
       const chosenPiece = availableTurnPieces[getRandomInt(0, availableTurnPieces.length)];
 
-      console.log('>>>', 'I HAVE DECIDED TO MOVE: ', chosenPiece);
+      console.log('I HAVE DECIDED TO MOVE: ', chosenPiece);
 
       const availableRoutes = getAvailableRoutes(cells, chosenPiece);
 
-      console.log('>>>', 'I CAN MOVE IT TO: ', availableRoutes);
+      console.log('I CAN MOVE IT TO: ', availableRoutes);
 
       const chosenRoute = availableRoutes[getRandomInt(0, availableRoutes.length)];
 
-      console.log('>>>', 'I CHOOSE TO GO THIS WAY: ', chosenRoute);
+      console.log('I CHOOSE TO GO THIS WAY: ', chosenRoute);
 
       if (chosenRoute.length > 1) {
-        const hitPieceCoordinate = chosenRoute[0].coordinate;
-        const cellAfterHitCoordinate = chosenRoute[1].coordinate;
+        const hitPieceCoordinate = chosenRoute[chosenRoute.length - 2].coordinate;
+        const cellAfterHitCoordinate = chosenRoute[chosenRoute.length - 1].coordinate;
 
-        console.log('>>>', 'HEHE! I WILL HIT: ', hitPieceCoordinate);
+        console.log('HEHE! I WILL HIT: ', hitPieceCoordinate);
 
         dispatch(hitPiece(chosenPiece, hitPieceCoordinate, cellAfterHitCoordinate));
       } else {
-        const moveCoordinate = chosenRoute[0].coordinate;
-        console.log('>>>', 'MOVING TO: ', moveCoordinate);
+        const moveCoordinate = chosenRoute[getRandomInt(0, chosenRoute.length)].coordinate;
+        console.log('MOVING TO: ', moveCoordinate);
         dispatch(movePiece(chosenPiece, moveCoordinate));
       }
     }
@@ -83,17 +83,17 @@ const DummyAI: React.FC = () => {
       const availableRoutes = getAvailableRoutes(cells, mandatoryTurnPiece);
       const chosenRoute = availableRoutes[getRandomInt(0, availableRoutes.length)];
 
-      console.log('>>>', 'I CHOOSE TO GO AND HIT THIS WAY: ', chosenRoute);
+      console.log('I CHOOSE TO GO AND HIT THIS WAY: ', chosenRoute);
 
-      if (chosenRoute.length > 1) {
-        const hitPieceCoordinate = chosenRoute[0].coordinate;
-        const cellAfterHitCoordinate = chosenRoute[1].coordinate;
+      if (isRouteWithHitPiece(chosenRoute)) {
+        const hitPieceCoordinate = chosenRoute[chosenRoute.length - 2].coordinate;
+        const cellAfterHitCoordinate = chosenRoute[chosenRoute.length - 1].coordinate;
 
-        console.log('>>>', 'HEHE! I WILL HIT: ', hitPieceCoordinate);
+        console.log('HEHE! I WILL HIT: ', hitPieceCoordinate);
 
         dispatch(hitPiece(mandatoryTurnPiece, hitPieceCoordinate, cellAfterHitCoordinate));
       } else {
-        console.log('>>>', 'OOOPS! SOMETHING WENT WRONG');
+        console.log('OOOPS! SOMETHING WENT WRONG');
       }
     }
   }, [

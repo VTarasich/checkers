@@ -198,6 +198,16 @@ export const getRouteWithCell = (
 ): RouteItem[] | undefined => routes
   .find((availableRoute) => routeContainsCell(availableRoute, cellCoordinate));
 
+const getIsQueen = (piece: Piece | null, movedTo: Coordinate): boolean => {
+  if (!piece) {
+    return false;
+  }
+
+  return piece.isQueen
+    || (piece.color === 'white' && movedTo.rowIndex === 0)
+    || (piece.color === 'black' && movedTo.rowIndex === 7);
+};
+
 export const getStateWithMovedPiece = (
   cellsState: CellsMap,
   fromCoordinate: Coordinate,
@@ -208,11 +218,12 @@ export const getStateWithMovedPiece = (
   const cellFrom = cellsState[cellIndexFrom];
   const cellTo = cellsState[cellIndexTo];
 
-  if (!cellFrom || !cellTo) {
+  if (!cellFrom || !cellTo || !cellFrom.piece) {
     return cellsState;
   }
 
   const { piece } = cellFrom;
+  const isQueen = getIsQueen(piece, toCoordinate);
 
   return {
     ...cellsState,
@@ -222,7 +233,10 @@ export const getStateWithMovedPiece = (
     },
     [cellIndexTo]: {
       ...cellTo,
-      piece,
+      piece: {
+        ...piece,
+        isQueen,
+      },
     },
   };
 };
@@ -240,11 +254,12 @@ export const getStateWithHitPiece = (
   const cellHit = cellsState[cellIndexFrom];
   const cellTo = cellsState[cellIndexTo];
 
-  if (!cellFrom || !cellTo || !cellHit || !cellHit.piece) {
+  if (!cellFrom || !cellTo || !cellHit || !cellHit.piece || !cellFrom.piece) {
     return cellsState;
   }
 
   const { piece } = cellFrom;
+  const isQueen = getIsQueen(piece, toCoordinate);
 
   return {
     ...cellsState,
@@ -258,7 +273,10 @@ export const getStateWithHitPiece = (
     },
     [cellIndexTo]: {
       ...cellTo,
-      piece,
+      piece: {
+        ...piece,
+        isQueen,
+      },
     },
   };
 };
