@@ -1,18 +1,37 @@
-export type HighlightType = 'available' | 'none';
+export type Color = 'white' | 'black';
 
 export interface Piece {
-  color: 'white' | 'black';
+  color: Color;
   isRisen: boolean;
 }
 
-export interface Cell {
-  highlight: 'default' | 'none';
+export interface CellState {
+  piece: Piece | null;
 }
 
-export interface PiecesState {
-  [key: string]: Piece | null;
+export type Coordinate = {
+  rowIndex: number;
+  colIndex: number;
 }
 
-export interface CellsState {
-  [key: string]: Cell;
+export type DirectionOffset = {
+  rowOffset: number,
+  colOffset: number,
 }
+
+export type CellsMap = {
+  [key: string]: CellState;
+}
+
+export interface RouteItem {
+  coordinate: Coordinate;
+  cell: CellState;
+}
+
+export type Route = RouteItem[];
+
+export type Direction = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+
+export type GameMode = 'PvP' | 'AI';
+
+export type PlayerType = Color;

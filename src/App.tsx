@@ -1,13 +1,18 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import BoardLayout from './components/board-layout/BoardLayout';
+import 'normalize.css';
 import store from './store';
+import MainContainer from './components/main-container/MainContainer';
+import { GlobalStyle } from './common.styled';
 
 const App: React.FC = () => (
-  <Provider store={store}>
-    <BoardLayout />
-  </Provider>
+  <>
+    <GlobalStyle />
+    <Provider store={store}>
+      <MainContainer />
+    </Provider>
+  </>
 );
 
 export default App;
