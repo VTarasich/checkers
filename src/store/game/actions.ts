@@ -1,4 +1,4 @@
-import { Coordinate, CellState, GameMode } from '../../types';
+import { Coordinate, GameMode } from '../../types';
 import { GameState } from './reducer';
 
 export const RISE_PIECE = 'game/RISE_PIECE';

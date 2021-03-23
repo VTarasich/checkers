@@ -1,69 +1,61 @@
 import React, { MouseEventHandler } from 'react';
-
 import { useDispatch, useSelector } from 'react-redux';
-import { $Piece, $PieceContainer } from './Piece.styled';
-import { getCellIndex } from '../../utils/common';
+
 import {
-  getSelectIsPieceAvailable,
   getSelectIsPieceRisen,
   getSelectPieceState,
   selectCurrentPlayer,
-  selectGameMode,
-  selectMandatoryTurnPiece,
-  selectSelectedPieceCoordinates,
+  selectSelectedPieceCoordinate,
 } from '../../store/game/selectors';
 import { hoverPiece, risePiece } from '../../store/game/actions';
 import { Coordinate } from '../../types';
-import { useIsPieceHit } from '../cell/Cell';
-import { AI_PLAYER } from '../ai/DummyAI';
+import useIsCellUnderHit from '../../hooks/useIsCellUnderHit';
+
+import useIsPieceInteractive from './useIsPieceInteractive';
+import useIsPieceMandatoryToMakeTurn from './useIsPieceMandatoryToMakeTurn';
+
+import { $Piece, $PieceContainer } from './Piece.styled';
 
 interface CellProps {
   coordinate: Coordinate;
 }
 
 const Piece: React.FC<CellProps> = ({ coordinate }) => {
-  const cellIndex = getCellIndex(coordinate);
+  const dispatch = useDispatch();
   const pieceElementRef = React.createRef<HTMLDivElement>();
 
-  const dispatch = useDispatch();
-  const piece = useSelector(getSelectPieceState(cellIndex));
-  const gameMode = useSelector(selectGameMode);
-  const isRisen = useSelector(getSelectIsPieceRisen(cellIndex));
-  const isAvailable = useSelector(getSelectIsPieceAvailable(coordinate));
-  const selectedPieceCoordinates = useSelector(selectSelectedPieceCoordinates);
-  const mandatoryTurnPiece = useSelector(selectMandatoryTurnPiece);
+  const piece = useSelector(getSelectPieceState(coordinate));
+  const isRisen = useSelector(getSelectIsPieceRisen(coordinate));
+  const selectedPieceCoordinates = useSelector(selectSelectedPieceCoordinate);
   const currentPlayer = useSelector(selectCurrentPlayer);
 
-  const isPieceHit = useIsPieceHit(coordinate);
-  const isMandatory = mandatoryTurnPiece !== null && getCellIndex(mandatoryTurnPiece) === cellIndex;
+  const isPieceHit = useIsCellUnderHit(coordinate);
+  const isMandatory = useIsPieceMandatoryToMakeTurn(coordinate);
+  const isPieceInteractive = useIsPieceInteractive(coordinate);
 
-  const isPieceInteractive = gameMode === 'AI'
-    ? currentPlayer !== AI_PLAYER && isAvailable
-    : isAvailable;
-
-  const onKeyDown = () => {
+  const onKeyDown = React.useCallback(() => {
     if (!piece || currentPlayer !== piece.color) {
       return;
     }
 
     dispatch(risePiece(coordinate));
-  };
+  }, [dispatch, piece, currentPlayer, coordinate]);
 
-  const onMouseEnter: MouseEventHandler<HTMLDivElement> = () => {
+  const onMouseEnter: MouseEventHandler<HTMLDivElement> = React.useCallback(() => {
     if (currentPlayer !== piece?.color || selectedPieceCoordinates) {
       return;
     }
 
     dispatch(hoverPiece(coordinate));
-  };
+  }, [dispatch, coordinate, currentPlayer, piece, selectedPieceCoordinates]);
 
-  const onMouseLeave: MouseEventHandler<HTMLDivElement> = () => {
+  const onMouseLeave: MouseEventHandler<HTMLDivElement> = React.useCallback(() => {
     if (currentPlayer !== piece?.color || selectedPieceCoordinates) {
       return;
     }
 
     dispatch(hoverPiece(null));
-  };
+  }, [dispatch, currentPlayer, piece, selectedPieceCoordinates]);
 
   return piece
     ? (

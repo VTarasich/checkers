@@ -85,12 +85,12 @@ export const reducer = (state = defaultGameState, action: GameAction): GameState
     case MOVE_PIECE: {
       const { fromCoordinate, toCoordinate } = action.payload;
       const nextPlayer = getNextPlayer(state.currentPlayer, false);
-      const updatedState = getStateWithMovedPiece(state.cells, fromCoordinate, toCoordinate);
-      const availableTurnPieces = getAvailableTurnPieces(updatedState, nextPlayer);
+      const updatedCellsState = getStateWithMovedPiece(state.cells, fromCoordinate, toCoordinate);
+      const availableTurnPieces = getAvailableTurnPieces(updatedCellsState, nextPlayer);
 
       return {
         ...state,
-        cells: updatedState,
+        cells: updatedCellsState,
         selectedPieceCoordinate: null,
         mandatoryTurnPiece: null,
         history: [getHistoryEntry(state), ...state.history],

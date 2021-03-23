@@ -1,4 +1,5 @@
 import React from 'react';
+
 import MenuButton from '../menu-button/MenuButton';
 import { GameMode } from '../../types';
 

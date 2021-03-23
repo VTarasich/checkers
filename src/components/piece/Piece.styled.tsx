@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+
 import {
   CELL_SIZE, COLOR_ACCENT, COLOR_BLACK, COLOR_WHITE, getDottedPattern,
 } from '../../common.styled';
@@ -90,9 +91,10 @@ export const $Piece = styled.div<{
     width: 40%;
     height: 40%;
     ${(props) => props.isQueen && css`
+      font-weight: bold;
       border: 2px solid ${COLOR_ACCENT};
       color: ${COLOR_ACCENT};
-      content: '!';
+      content: 'Q';
     `}
   }
 `;

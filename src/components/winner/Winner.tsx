@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { $WinnerContainer, $Title } from './Winner.styled';
 import MenuButton from '../menu-button/MenuButton';
 import { PlayerType } from '../../types';
+
+import { $WinnerContainer, $Title } from './Winner.styled';
 
 interface MenuButtonProps {
   winner: PlayerType | null;

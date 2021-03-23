@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+
 import { CELL_SIZE, COLOR_MAIN, getStripedPattern } from '../../common.styled';
 
 export type CellHighLight = 'none' | 'hit' | 'available';

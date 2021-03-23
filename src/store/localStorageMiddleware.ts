@@ -1,4 +1,6 @@
-import { AnyAction, Dispatch, Store } from 'redux';
+import {
+  AnyAction, Dispatch, MiddlewareAPI,
+} from 'redux';
 import {
   GameAction, HIT_PIECE, MOVE_PIECE, UNDO,
 } from './game/actions';
@@ -7,7 +9,7 @@ import { selectGameState } from './game/selectors';
 import { RootState } from './index';
 
 const localStorageMiddleware = (
-  { getState }: Store<RootState>,
+  { getState }: MiddlewareAPI<Dispatch, RootState>,
 ) => (next: Dispatch<AnyAction>) => (action: GameAction): AnyAction => {
   // Do something in here, when each action is dispatched
   const nextAction = next(action);

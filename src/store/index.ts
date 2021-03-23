@@ -1,5 +1,5 @@
 import {
-  createStore, combineReducers, applyMiddleware, compose, Middleware,
+  createStore, combineReducers, applyMiddleware,
 } from 'redux';
 
 import { GameState, reducer } from './game/reducer';
@@ -9,12 +9,8 @@ export interface RootState {
   game: GameState,
 }
 
-const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
 const store = createStore(combineReducers<RootState>({
   game: reducer,
-}), composeEnhancers(
-  applyMiddleware(localStorageMiddleware as Middleware),
-));
+}), applyMiddleware(localStorageMiddleware));
 
 export default store;

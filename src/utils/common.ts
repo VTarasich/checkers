@@ -1,16 +1,28 @@
 import {
   Coordinate,
   CellsMap,
-  CellState, Piece,
+  CellState,
+  Piece, DirectionOffset,
 } from '../types';
 
-export const createRowSchema = (hasOffset = false): boolean[] => Array.from(Array(8))
+export const BOARD_SIZE = 8;
+
+export const createRowSchema = (hasOffset = false): boolean[] => Array.from(Array(BOARD_SIZE))
   .map((_, i) => (hasOffset ? i % 2 === 1 : i % 2 === 0));
 
-export const createBoardSchema = (): boolean[][] => Array.from(Array(8))
+export const createBoardSchema = (): boolean[][] => Array.from(Array(BOARD_SIZE))
   .map((_, i) => createRowSchema(i % 2 === 0));
 
 export const getCellIndex = ({ rowIndex, colIndex }: Coordinate): string => `${rowIndex}-${colIndex}`;
+
+export const getOffsetCoordinate = (
+  { rowIndex, colIndex }: Coordinate,
+  { rowOffset, colOffset }: DirectionOffset,
+): Coordinate => ({
+  rowIndex: rowIndex + rowOffset,
+  colIndex: colIndex + colOffset,
+});
+
 export const getCellCoordinateFromIndex = (index: string): Coordinate => {
   const [rowIndex, colIndex] = index.split('-');
 
@@ -18,6 +30,16 @@ export const getCellCoordinateFromIndex = (index: string): Coordinate => {
     colIndex: Number(colIndex),
     rowIndex: Number(rowIndex),
   };
+};
+
+export const areCoordinatesEqual = (
+  coordinate: Coordinate,
+  coordinateToCompare: Coordinate,
+): boolean => {
+  const { rowIndex, colIndex } = coordinate;
+  const { rowIndex: rowIndexToCompare, colIndex: colIndexToCompare } = coordinateToCompare;
+
+  return rowIndex === rowIndexToCompare && colIndex === colIndexToCompare;
 };
 
 const getDefaultPieceByRowIndex = (rowIndex: number): Piece | null => {
@@ -53,7 +75,6 @@ const createDefaultCellsRow = (
     ...rowResult,
     [getCellIndex({ rowIndex, colIndex })]: {
       piece: getDefaultPieceByRowIndex(rowIndex),
-      highlight: 'none',
     } as CellState,
   };
 }, {});

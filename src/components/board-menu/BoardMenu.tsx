@@ -1,7 +1,8 @@
 import React from 'react';
 
-import $Container from './BoardMenu.styled';
 import MenuButton from '../menu-button/MenuButton';
+
+import $Container from './BoardMenu.styled';
 
 interface MenuButtonProps {
   onUndo: () => void;

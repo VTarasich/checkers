@@ -2,6 +2,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 
 import 'normalize.css';
+
 import store from './store';
 import MainContainer from './components/main-container/MainContainer';
 import { GlobalStyle } from './common.styled';

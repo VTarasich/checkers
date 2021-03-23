@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { COLOR_BLACK, COLOR_WHITE } from '../../common.styled';
 
 const ACTION_OFFSET_PX = 2;

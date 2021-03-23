@@ -1,136 +1,11 @@
 import {
-  CellsMap, CellState, Coordinate, Direction, DirectionOffset, Piece, PlayerType, Route, RouteItem,
+  CellsMap, Coordinate, Direction, Piece, PlayerType, Route, RouteItem,
 } from '../types';
-import { getCellCoordinateFromIndex, getCellIndex } from './common';
+import { getCellCoordinateFromIndex, getCellIndex, getOffsetCoordinate } from './common';
+import { getAvailableDirections, getDirectionOffset } from './directions';
 
-const getOffsetCoordinate = (
-  { rowIndex, colIndex }: Coordinate,
-  { rowOffset, colOffset }: DirectionOffset,
-): Coordinate => ({
-  rowIndex: rowIndex + rowOffset,
-  colIndex: colIndex + colOffset,
-});
-
-const getRoute = (
-  state: CellsMap,
-  directionOffset: DirectionOffset,
-  startingPiece: Piece,
-  coordinate: Coordinate,
-  result: RouteItem[],
-): RouteItem[] => {
-  const cellIndex = getCellIndex(coordinate);
-
-  const currentCell = state[cellIndex];
-
-  if (!currentCell) {
-    return result;
-  }
-
-  const nextCellCoordinates = getOffsetCoordinate(coordinate, directionOffset);
-  const nextCellIndex = getCellIndex(nextCellCoordinates);
-
-  const nextCell = state[nextCellIndex];
-  const prevRouteElement = result[result.length - 1];
-
-  const currentRouteItem = {
-    coordinate,
-    cell: currentCell,
-  };
-
-  /* eslint-disable no-else-return */
-  if (currentCell.piece === null) {
-    // if king piece search for last piece in the route
-    if (prevRouteElement.cell.piece) {
-      return [
-        ...result,
-        currentRouteItem,
-      ];
-    } else {
-      // if king piece - do recursive
-      return result;
-    }
-  } else {
-    const currentPiece = currentCell.piece;
-
-    if (prevRouteElement.cell.piece === null) {
-      // if king piece - do recursive
-      return result;
-    }
-
-    if (currentPiece.color !== startingPiece.color) {
-      if (!nextCell || nextCell.piece) {
-        return result;
-      }
-
-      return getRoute(
-        state,
-        directionOffset,
-        startingPiece,
-        nextCellCoordinates,
-        [
-          ...result,
-          currentRouteItem,
-        ],
-      );
-    } else {
-      return result;
-    }
-  }
-  /* eslint-enable no-else-return */
-};
-
-const directionOffsets = {
-  'top-right': {
-    rowOffset: -1,
-    colOffset: 1,
-  },
-  'top-left': {
-    rowOffset: -1,
-    colOffset: -1,
-  },
-  'bottom-right': {
-    rowOffset: 1,
-    colOffset: 1,
-  },
-  'bottom-left': {
-    rowOffset: 1,
-    colOffset: -1,
-  },
-};
-
-const getDirectionOffset = (direction: Direction): DirectionOffset => directionOffsets[direction];
-
-const getAvailableDirections = (
-  state: CellsMap,
-  coordinate: Coordinate,
-): Direction[] => Object.entries(directionOffsets)
-  .filter(([direction, directionOffset]) => {
-    const { piece } = state[getCellIndex(coordinate)];
-
-    if (piece === null) {
-      return false;
-    }
-
-    const availableCell = state[getCellIndex(getOffsetCoordinate(coordinate, directionOffset))];
-
-    if (!availableCell) {
-      return false;
-    }
-
-    // piece exists in current direction
-    if (availableCell.piece) {
-      return availableCell.piece.color !== piece.color;
-    }
-
-    // cell is empty in current direction
-    // todo: queen piece
-    if (piece.color === 'black') {
-      return direction === 'bottom-left' || direction === 'bottom-right';
-    }
-
-    return direction === 'top-left' || direction === 'top-right';
-  }).map(([direction]) => direction as Direction);
-
+// gets dummy route just two cells ahead
+// recursion can be used to get routes for queen cells
 const getDummyAvailableRoute = (
   state: CellsMap,
   direction: Direction,
@@ -168,6 +43,9 @@ const getDummyAvailableRoute = (
 export const isRouteWithHitPiece = (route: RouteItem[]): boolean => route
   .some((routeItem) => routeItem.cell.piece);
 
+export const routeContainsCell = (route: RouteItem[], cellCoordinate: Coordinate): boolean => route
+  .some((routeItem) => getCellIndex(routeItem.coordinate) === getCellIndex(cellCoordinate));
+
 export const getAvailableRoutes = (
   state: CellsMap,
   coordinate: Coordinate,
@@ -189,9 +67,6 @@ export const getAvailableRoutes = (
   return routesWithHit.length ? routesWithHit : availableRoutes;
 };
 
-export const routeContainsCell = (route: RouteItem[], cellCoordinate: Coordinate): boolean => route
-  .some((routeItem) => getCellIndex(routeItem.coordinate) === getCellIndex(cellCoordinate));
-
 export const getRouteWithCell = (
   routes: Route[],
   cellCoordinate: Coordinate,
@@ -206,79 +81,6 @@ const getIsQueen = (piece: Piece | null, movedTo: Coordinate): boolean => {
   return piece.isQueen
     || (piece.color === 'white' && movedTo.rowIndex === 0)
     || (piece.color === 'black' && movedTo.rowIndex === 7);
-};
-
-export const getStateWithMovedPiece = (
-  cellsState: CellsMap,
-  fromCoordinate: Coordinate,
-  toCoordinate: Coordinate,
-): CellsMap => {
-  const cellIndexFrom = getCellIndex(fromCoordinate);
-  const cellIndexTo = getCellIndex(toCoordinate);
-  const cellFrom = cellsState[cellIndexFrom];
-  const cellTo = cellsState[cellIndexTo];
-
-  if (!cellFrom || !cellTo || !cellFrom.piece) {
-    return cellsState;
-  }
-
-  const { piece } = cellFrom;
-  const isQueen = getIsQueen(piece, toCoordinate);
-
-  return {
-    ...cellsState,
-    [cellIndexFrom]: {
-      ...cellFrom,
-      piece: null,
-    },
-    [cellIndexTo]: {
-      ...cellTo,
-      piece: {
-        ...piece,
-        isQueen,
-      },
-    },
-  };
-};
-
-export const getStateWithHitPiece = (
-  cellsState: CellsMap,
-  fromCoordinate: Coordinate,
-  hitPieceCoordinate: Coordinate,
-  toCoordinate: Coordinate,
-): CellsMap => {
-  const cellIndexFrom = getCellIndex(fromCoordinate);
-  const cellIndexHit = getCellIndex(hitPieceCoordinate);
-  const cellIndexTo = getCellIndex(toCoordinate);
-  const cellFrom = cellsState[cellIndexFrom];
-  const cellHit = cellsState[cellIndexFrom];
-  const cellTo = cellsState[cellIndexTo];
-
-  if (!cellFrom || !cellTo || !cellHit || !cellHit.piece || !cellFrom.piece) {
-    return cellsState;
-  }
-
-  const { piece } = cellFrom;
-  const isQueen = getIsQueen(piece, toCoordinate);
-
-  return {
-    ...cellsState,
-    [cellIndexFrom]: {
-      ...cellFrom,
-      piece: null,
-    },
-    [cellIndexHit]: {
-      ...cellFrom,
-      piece: null,
-    },
-    [cellIndexTo]: {
-      ...cellTo,
-      piece: {
-        ...piece,
-        isQueen,
-      },
-    },
-  };
 };
 
 export const getMandatoryTurnPieceAfterHitCoordinate = (
@@ -370,4 +172,77 @@ export const getWinner = (state: CellsMap): PlayerType | null => {
   }
 
   return null;
+};
+
+export const getStateWithMovedPiece = (
+  cellsState: CellsMap,
+  fromCoordinate: Coordinate,
+  toCoordinate: Coordinate,
+): CellsMap => {
+  const cellIndexFrom = getCellIndex(fromCoordinate);
+  const cellIndexTo = getCellIndex(toCoordinate);
+  const cellFrom = cellsState[cellIndexFrom];
+  const cellTo = cellsState[cellIndexTo];
+
+  if (!cellFrom || !cellTo || !cellFrom.piece) {
+    return cellsState;
+  }
+
+  const { piece } = cellFrom;
+  const isQueen = getIsQueen(piece, toCoordinate);
+
+  return {
+    ...cellsState,
+    [cellIndexFrom]: {
+      ...cellFrom,
+      piece: null,
+    },
+    [cellIndexTo]: {
+      ...cellTo,
+      piece: {
+        ...piece,
+        isQueen,
+      },
+    },
+  };
+};
+
+export const getStateWithHitPiece = (
+  cellsState: CellsMap,
+  fromCoordinate: Coordinate,
+  hitPieceCoordinate: Coordinate,
+  toCoordinate: Coordinate,
+): CellsMap => {
+  const cellIndexFrom = getCellIndex(fromCoordinate);
+  const cellIndexHit = getCellIndex(hitPieceCoordinate);
+  const cellIndexTo = getCellIndex(toCoordinate);
+  const cellFrom = cellsState[cellIndexFrom];
+  const cellHit = cellsState[cellIndexFrom];
+  const cellTo = cellsState[cellIndexTo];
+
+  if (!cellFrom || !cellTo || !cellHit || !cellHit.piece || !cellFrom.piece) {
+    return cellsState;
+  }
+
+  const { piece } = cellFrom;
+  const isQueen = getIsQueen(piece, toCoordinate);
+
+  return {
+    ...cellsState,
+    [cellIndexFrom]: {
+      ...cellFrom,
+      piece: null,
+    },
+    [cellIndexHit]: {
+      ...cellFrom,
+      piece: null,
+    },
+    [cellIndexTo]: {
+      ...cellTo,
+      piece: {
+        ...piece,
+        isQueen,
+      },
+    },
+  };
 };

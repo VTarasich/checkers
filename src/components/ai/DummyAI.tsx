@@ -1,21 +1,16 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
 import { selectCells, selectCurrentPlayer, selectMandatoryTurnPiece } from '../../store/game/selectors';
 import { getAvailableRoutes, getAvailableTurnPieces, isRouteWithHitPiece } from '../../utils/game';
 import { getRandomInt } from '../../utils/common';
 import { hitPiece, movePiece } from '../../store/game/actions';
-
-function usePrevious<ValueType>(value: ValueType): ValueType | undefined {
-  const ref = React.useRef<ValueType>();
-
-  React.useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref.current;
-}
+import { Coordinate, Route } from '../../types';
+import usePrevious from '../../hooks/usePrevious';
 
 export const AI_PLAYER = 'black';
+
+const AI_MOVE_DELAY_MS = 500;
 
 const DummyAI: React.FC = () => {
   const dispatch = useDispatch();
@@ -33,6 +28,27 @@ const DummyAI: React.FC = () => {
       console.log('I`LL BE BACK');
     };
   }, []);
+
+  const hitPieceAction = React.useCallback((pieceCoordinate: Coordinate, hitRoute: Route) => {
+    const hitPieceCoordinate = hitRoute[hitRoute.length - 2].coordinate;
+    const cellAfterHitCoordinate = hitRoute[hitRoute.length - 1].coordinate;
+
+    console.log('HEHE! I WILL HIT: ', hitPieceCoordinate);
+
+    window.setTimeout(() => {
+      dispatch(hitPiece(pieceCoordinate, hitPieceCoordinate, cellAfterHitCoordinate));
+    }, AI_MOVE_DELAY_MS);
+  }, [dispatch]);
+
+  const movePieceAction = React.useCallback((pieceCoordinate: Coordinate, moveRoute: Route) => {
+    const moveCoordinate = moveRoute[getRandomInt(0, moveRoute.length)].coordinate;
+
+    console.log('MOVING TO: ', moveCoordinate);
+
+    window.setTimeout(() => {
+      dispatch(movePiece(pieceCoordinate, moveCoordinate));
+    }, AI_MOVE_DELAY_MS);
+  }, [dispatch]);
 
   React.useEffect(() => {
     if (currentPlayer !== previousPlayer && currentPlayer === AI_PLAYER) {
@@ -60,16 +76,9 @@ const DummyAI: React.FC = () => {
       console.log('I CHOOSE TO GO THIS WAY: ', chosenRoute);
 
       if (chosenRoute.length > 1) {
-        const hitPieceCoordinate = chosenRoute[chosenRoute.length - 2].coordinate;
-        const cellAfterHitCoordinate = chosenRoute[chosenRoute.length - 1].coordinate;
-
-        console.log('HEHE! I WILL HIT: ', hitPieceCoordinate);
-
-        dispatch(hitPiece(chosenPiece, hitPieceCoordinate, cellAfterHitCoordinate));
+        hitPieceAction(chosenPiece, chosenRoute);
       } else {
-        const moveCoordinate = chosenRoute[getRandomInt(0, chosenRoute.length)].coordinate;
-        console.log('MOVING TO: ', moveCoordinate);
-        dispatch(movePiece(chosenPiece, moveCoordinate));
+        movePieceAction(chosenPiece, chosenRoute);
       }
     }
 
@@ -86,18 +95,20 @@ const DummyAI: React.FC = () => {
       console.log('I CHOOSE TO GO AND HIT THIS WAY: ', chosenRoute);
 
       if (isRouteWithHitPiece(chosenRoute)) {
-        const hitPieceCoordinate = chosenRoute[chosenRoute.length - 2].coordinate;
-        const cellAfterHitCoordinate = chosenRoute[chosenRoute.length - 1].coordinate;
-
-        console.log('HEHE! I WILL HIT: ', hitPieceCoordinate);
-
-        dispatch(hitPiece(mandatoryTurnPiece, hitPieceCoordinate, cellAfterHitCoordinate));
+        hitPieceAction(mandatoryTurnPiece, chosenRoute);
       } else {
         console.log('OOOPS! SOMETHING WENT WRONG');
       }
     }
   }, [
-    dispatch, cells, currentPlayer, previousPlayer, previousMandatoryTurnPiece, mandatoryTurnPiece,
+    dispatch,
+    cells,
+    currentPlayer,
+    previousPlayer,
+    previousMandatoryTurnPiece,
+    mandatoryTurnPiece,
+    hitPieceAction,
+    movePieceAction,
   ]);
 
   return null;

@@ -1,11 +1,12 @@
 import React from 'react';
-
 import { useSelector } from 'react-redux';
-import { $Board, $PlayerName } from './BoardLayout.styled';
 import Cell from '../cell/Cell';
 import { createBoardSchema, getCellIndex } from '../../utils/common';
 import { selectCurrentPlayer, selectGameMode } from '../../store/game/selectors';
+
 import DragNDropLayer from './DragNDropLayer';
+
+import { $Board, $PlayerName } from './BoardLayout.styled';
 
 const defaultSchema = createBoardSchema();
 
@@ -16,7 +17,12 @@ const BoardLayout: React.FC = () => {
   return (
     <>
       <DragNDropLayer />
-      <$PlayerName position="top" isActive={activePlayer === 'black'}>{gameMode === 'AI' ? 'AI' : 'Player 2'}</$PlayerName>
+      <$PlayerName
+        position="top"
+        isActive={activePlayer === 'black'}
+      >
+        {gameMode === 'AI' ? 'Dummy AI' : 'Player 2'}
+      </$PlayerName>
       <$Board>
         {defaultSchema
           .map((row, rowIndex) => row
@@ -40,7 +46,12 @@ const BoardLayout: React.FC = () => {
               );
             }))}
       </$Board>
-      <$PlayerName position="bottom" isActive={activePlayer === 'white'}>Player 1</$PlayerName>
+      <$PlayerName
+        position="bottom"
+        isActive={activePlayer === 'white'}
+      >
+        Player 1
+      </$PlayerName>
     </>
   );
 };

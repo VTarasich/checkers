@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { BOARD_SIZE_PX, COLOR_BLACK, COLOR_WHITE } from '../../common.styled';
 
 export const $MainContainer = styled.div`

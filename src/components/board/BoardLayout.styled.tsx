@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+
 import {
   BOARD_SIZE_PX, COLOR_ACCENT, COLOR_BLACK, COLOR_MAIN, COLOR_WHITE,
 } from '../../common.styled';
